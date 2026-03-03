@@ -134,7 +134,17 @@ class General extends AbstractProtocol
             case 1:
                 $config['security'] = "tls";
                 if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-                    $config['sni'] = $serverName;
+                    if (str_contains($serverName, ',')) {
+                        $parts = explode(',', $serverName, 2);
+                        $config['sni'] = $parts[0];
+                        if ($parts[1] === '1' || $parts[1] === 'true') {
+                            $config['ech'] = '1';
+                        } else {
+                            $config['ech'] = $parts[1];
+                        }
+                    } else {
+                        $config['sni'] = $serverName;
+                    }
                 }
                 break;
             case 2: //reality
@@ -193,8 +203,19 @@ class General extends AbstractProtocol
         $array = [];
         $array['allowInsecure'] = $protocol_settings['allow_insecure'];
         if ($serverName = data_get($protocol_settings, 'server_name')) {
-            $array['peer'] = $serverName;
-            $array['sni'] = $serverName;
+            if (str_contains($serverName, ',')) {
+                $parts = explode(',', $serverName, 2);
+                $array['peer'] = $parts[0];
+                $array['sni'] = $parts[0];
+                if ($parts[1] === '1' || $parts[1] === 'true') {
+                    $array['ech'] = '1';
+                } else {
+                    $array['ech'] = $parts[1];
+                }
+            } else {
+                $array['peer'] = $serverName;
+                $array['sni'] = $serverName;
+            }
         }
         switch ($server['protocol_settings']['network']) {
             case 'ws':

@@ -261,10 +261,12 @@ class ClashMeta extends AbstractProtocol
             case 'tcp':
                 $array['network'] = data_get($protocol_settings, 'network_settings.header.type', 'tcp');
                 if (data_get($protocol_settings, 'network_settings.header.type', 'none') !== 'none') {
-                    if ($httpOpts = array_filter([
-                        'headers' => data_get($protocol_settings, 'network_settings.header.request.headers'),
-                        'path' => data_get($protocol_settings, 'network_settings.header.request.path', ['/'])
-                    ])) {
+                    if (
+                        $httpOpts = array_filter([
+                            'headers' => data_get($protocol_settings, 'network_settings.header.request.headers'),
+                            'path' => data_get($protocol_settings, 'network_settings.header.request.path', ['/'])
+                        ])
+                    ) {
                         $array['http-opts'] = $httpOpts;
                     }
                 }
@@ -309,7 +311,17 @@ class ClashMeta extends AbstractProtocol
                 $array['tls'] = true;
                 $array['skip-cert-verify'] = (bool) data_get($protocol_settings, 'tls_settings.allow_insecure', false);
                 if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-                    $array['servername'] = $serverName;
+                    if (str_contains($serverName, ',')) {
+                        $parts = explode(',', $serverName, 2);
+                        $array['servername'] = $parts[0];
+                        $array['client-fingerprint'] = Helper::getRandFingerprint();
+                        $array['ech-opts'] = [
+                            'pq-signature-schemes-enabled' => true,
+                            'dynamic-record-sizing-disabled' => false,
+                        ];
+                    } else {
+                        $array['servername'] = $serverName;
+                    }
                 }
                 break;
             case 2:
@@ -359,7 +371,17 @@ class ClashMeta extends AbstractProtocol
             'skip-cert-verify' => (bool) data_get($protocol_settings, 'allow_insecure', false)
         ];
         if ($serverName = data_get($protocol_settings, 'server_name')) {
-            $array['sni'] = $serverName;
+            if (str_contains($serverName, ',')) {
+                $parts = explode(',', $serverName, 2);
+                $array['sni'] = $parts[0];
+                $array['client-fingerprint'] = Helper::getRandFingerprint();
+                $array['ech-opts'] = [
+                    'pq-signature-schemes-enabled' => true,
+                    'dynamic-record-sizing-disabled' => false,
+                ];
+            } else {
+                $array['sni'] = $serverName;
+            }
         }
 
         switch (data_get($protocol_settings, 'network')) {

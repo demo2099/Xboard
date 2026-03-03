@@ -163,7 +163,19 @@ class Shadowrocket extends AbstractProtocol
                 $config['tls'] = 1;
                 $config['allowInsecure'] = (int) data_get($protocol_settings, 'tls_settings.allow_insecure');
                 if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-                    $config['peer'] = $serverName;
+                    if (str_contains($serverName, ',')) {
+                        $parts = explode(',', $serverName, 2);
+                        $config['peer'] = $parts[0];
+                        $config['sni'] = $parts[0];
+                        if ($parts[1] === '1' || $parts[1] === 'true') {
+                            $config['ech'] = '1';
+                        } else {
+                            $config['ech'] = $parts[1];
+                        }
+                    } else {
+                        $config['peer'] = $serverName;
+                        $config['sni'] = $serverName;
+                    }
                 }
                 break;
             case 2:
@@ -241,7 +253,19 @@ class Shadowrocket extends AbstractProtocol
         $name = rawurlencode($server['name']);
         $params['allowInsecure'] = data_get($protocol_settings, 'allow_insecure');
         if ($serverName = data_get($protocol_settings, 'server_name')) {
-            $params['peer'] = $serverName;
+            if (str_contains($serverName, ',')) {
+                $parts = explode(',', $serverName, 2);
+                $params['peer'] = $parts[0];
+                $params['sni'] = $parts[0];
+                if ($parts[1] === '1' || $parts[1] === 'true') {
+                    $params['ech'] = '1';
+                } else {
+                    $params['ech'] = $parts[1];
+                }
+            } else {
+                $params['peer'] = $serverName;
+                $params['sni'] = $serverName;
+            }
         }
         switch (data_get($protocol_settings, 'network')) {
             case 'grpc':

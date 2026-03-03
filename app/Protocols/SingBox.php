@@ -255,7 +255,17 @@ class SingBox extends AbstractProtocol
             switch ($protocol_settings['tls']) {
                 case 1:
                     if ($serverName = data_get($protocol_settings, 'tls_settings.server_name')) {
-                        $tlsConfig['server_name'] = $serverName;
+                        if (str_contains($serverName, ',')) {
+                            $parts = explode(',', $serverName, 2);
+                            $tlsConfig['server_name'] = $parts[0];
+                            $tlsConfig['ech'] = [
+                                'enabled' => true,
+                                'pq_signature_schemes_enabled' => true,
+                                'dynamic_record_sizing_disabled' => false,
+                            ];
+                        } else {
+                            $tlsConfig['server_name'] = $serverName;
+                        }
                     }
                     break;
                 case 2:
@@ -323,7 +333,17 @@ class SingBox extends AbstractProtocol
             ]
         ];
         if ($serverName = data_get($protocol_settings, 'server_name')) {
-            $array['tls']['server_name'] = $serverName;
+            if (str_contains($serverName, ',')) {
+                $parts = explode(',', $serverName, 2);
+                $array['tls']['server_name'] = $parts[0];
+                $array['tls']['ech'] = [
+                    'enabled' => true,
+                    'pq_signature_schemes_enabled' => true,
+                    'dynamic_record_sizing_disabled' => false,
+                ];
+            } else {
+                $array['tls']['server_name'] = $serverName;
+            }
         }
         $transport = match (data_get($protocol_settings, 'network')) {
             'grpc' => [
