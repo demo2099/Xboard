@@ -55,6 +55,7 @@ class XboardInstall extends Command
         try {
             $isDocker = file_exists('/.dockerenv');
             $enableSqlite = getenv('ENABLE_SQLITE', false);
+            $enableMysql = getenv('ENABLE_MYSQL', false);
             $enableRedis = getenv('ENABLE_REDIS', false);
             $adminAccount = getenv('ADMIN_ACCOUNT', false);
             $this->info("__    __ ____                      _  ");
@@ -78,7 +79,7 @@ class XboardInstall extends Command
                 return;
             }
             // 选择数据库类型
-            $dbType = $enableSqlite ? 'sqlite' : select(
+            $dbType = $enableSqlite ? 'sqlite' : ($enableMysql ? 'mysql' : select(
                 label: '请选择数据库类型',
                 options: [
                     'sqlite' => 'SQLite (无需额外安装)',
@@ -86,7 +87,7 @@ class XboardInstall extends Command
                     'postgresql' => 'PostgreSQL'
                 ],
                 default: 'sqlite'
-            );
+            ));
 
             // 使用 match 表达式配置数据库
             $envConfig = match ($dbType) {
@@ -126,9 +127,11 @@ class XboardInstall extends Command
                     $redis->ping();
                     $isReidsValid = true;
                 } catch (\Exception $e) {
-                    // 连接失败，输出错误消息
                     $this->error("redis连接失败：" . $e->getMessage());
                     $this->info("请重新输入REDIS配置");
+                    if (getenv('ENABLE_REDIS')) {
+                        throw $e;
+                    }
                     $enableRedis = false;
                     sleep(1);
                 }
@@ -283,11 +286,11 @@ class XboardInstall extends Command
         while (true) {
             $envConfig = [
                 'DB_CONNECTION' => 'mysql',
-                'DB_HOST' => text(label: "请输入MySQL数据库地址", default: '127.0.0.1', required: true),
-                'DB_PORT' => text(label: '请输入MySQL数据库端口', default: '3306', required: true),
-                'DB_DATABASE' => text(label: '请输入MySQL数据库名', default: 'xboard', required: true),
-                'DB_USERNAME' => text(label: '请输入MySQL数据库用户名', default: 'root', required: true),
-                'DB_PASSWORD' => text(label: '请输入MySQL数据库密码', required: false),
+                'DB_HOST' => getenv('DB_HOST') !== false ? getenv('DB_HOST') : text(label: "请输入MySQL数据库地址", default: '127.0.0.1', required: true),
+                'DB_PORT' => getenv('DB_PORT') !== false ? getenv('DB_PORT') : text(label: '请输入MySQL数据库端口', default: '3306', required: true),
+                'DB_DATABASE' => getenv('DB_DATABASE') !== false ? getenv('DB_DATABASE') : text(label: '请输入MySQL数据库名', default: 'xboard', required: true),
+                'DB_USERNAME' => getenv('DB_USERNAME') !== false ? getenv('DB_USERNAME') : text(label: '请输入MySQL数据库用户名', default: 'root', required: true),
+                'DB_PASSWORD' => getenv('DB_PASSWORD') !== false ? getenv('DB_PASSWORD') : text(label: '请输入MySQL数据库密码', required: false),
             ];
 
             try {
@@ -315,6 +318,9 @@ class XboardInstall extends Command
             } catch (\Exception $e) {
                 $this->error("MySQL数据库连接失败：" . $e->getMessage());
                 $this->info("请重新输入MySQL数据库配置");
+                if (getenv('ENABLE_MYSQL')) {
+                    throw $e;
+                }
             }
         }
     }

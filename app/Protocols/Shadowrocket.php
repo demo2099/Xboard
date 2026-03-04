@@ -18,6 +18,7 @@ class Shadowrocket extends AbstractProtocol
         Server::TYPE_TUIC,
         Server::TYPE_ANYTLS,
         Server::TYPE_SOCKS,
+        'custom_raw_node',
     ];
 
     protected $protocolRequirements = [
@@ -61,6 +62,9 @@ class Shadowrocket extends AbstractProtocol
             }
             if ($item['type'] === Server::TYPE_SOCKS) {
                 $uri .= self::buildSocks($item['password'], $item);
+            }
+            if ($item['type'] === 'custom_raw_node') {
+                $uri .= $item['raw_links'] ?? '';
             }
         }
         return response(base64_encode($uri))

@@ -18,6 +18,8 @@ class General extends AbstractProtocol
         Server::TYPE_TROJAN,
         Server::TYPE_HYSTERIA,
         Server::TYPE_SOCKS,
+        Server::TYPE_ANYTLS,
+        'custom_raw_node',
     ];
 
     protected $protocolRequirements = [
@@ -39,6 +41,8 @@ class General extends AbstractProtocol
                 Server::TYPE_TROJAN => self::buildTrojan($item['password'], $item),
                 Server::TYPE_HYSTERIA => self::buildHysteria($item['password'], $item),
                 Server::TYPE_SOCKS => self::buildSocks($item['password'], $item),
+                Server::TYPE_ANYTLS => self::buildAnyTLS($item['password'], $item),
+                'custom_raw_node' => $item['raw_links'] ?? '',
                 default => '',
             };
         }
@@ -281,5 +285,19 @@ class General extends AbstractProtocol
         $name = rawurlencode($server['name']);
         $credentials = base64_encode("{$password}:{$password}");
         return "socks://{$credentials}@{$server['host']}:{$server['port']}#{$name}\r\n";
+    }
+
+    public static function buildAnyTLS($password, $server)
+    {
+        $protocol_settings = $server['protocol_settings'];
+        $name = rawurlencode($server['name']);
+        $params = [
+            'sni' => data_get($protocol_settings, 'tls.server_name'),
+            'insecure' => data_get($protocol_settings, 'tls.allow_insecure')
+        ];
+        $query = http_build_query($params);
+        $uri = "anytls://{$password}@{$server['host']}:{$server['port']}?{$query}#{$name}";
+        $uri .= "\r\n";
+        return $uri;
     }
 }

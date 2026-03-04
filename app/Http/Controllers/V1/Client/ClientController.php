@@ -124,6 +124,11 @@ class ClientController extends Controller
     private function filterServers(array $servers, array $allowedTypes, ?array $filterKeywords): array
     {
         return collect($servers)->filter(function ($server) use ($allowedTypes, $filterKeywords) {
+            // Allow CustomNodes raw string to bypass all strict type/keyword filtering
+            if (($server['type'] ?? '') === 'custom_raw_node') {
+                return true;
+            }
+
             // Condition 1: Server type must be in the list of allowed types
             if ($allowedTypes && !in_array($server['type'], $allowedTypes)) {
                 return false; // Filter out (don't keep)

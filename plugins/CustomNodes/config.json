@@ -1,0 +1,22 @@
+{
+    "name": "自定义外站节点注入",
+    "description": "允许将纯文本 vless://、trojan:// 等分享链接自动拼接到用户订阅末尾",
+    "version": "1.0.0",
+    "author": "Antigravity",
+    "code": "custom_nodes",
+    "type": "feature",
+    "config": {
+        "enabled": {
+            "type": "boolean",
+            "default": false,
+            "label": "是否启用",
+            "description": "开启后会在下发订阅时追加指定的外部节点"
+        },
+        "nodes_text": {
+            "type": "text",
+            "default": "",
+            "label": "节点分享链接（每行一个）",
+            "description": "直接填入 vless://、trojan:// 等原版分享链接，它们会被附加到用户的订阅列表最后。"
+        }
+    }
+}

@@ -1,0 +1,57 @@
+services:
+  web:
+    image: ghcr.io/cedar2025/xboard:new
+    volumes:
+      - ./.docker/.data/redis/:/data/
+      - ./app/Protocols/General.php:/www/app/Protocols/General.php
+      - ./app/Protocols/ClashMeta.php:/www/app/Protocols/ClashMeta.php
+      - ./app/Protocols/SingBox.php:/www/app/Protocols/SingBox.php
+      - ./app/Protocols/Shadowrocket.php:/www/app/Protocols/Shadowrocket.php
+      - ./app/Http/Controllers/V1/Client/ClientController.php:/www/app/Http/Controllers/V1/Client/ClientController.php
+      - ./plugins/CustomNodes:/www/plugins/CustomNodes
+      - ./.env:/www/.env
+    environment:
+      - docker=true
+      - ENABLE_MYSQL=true
+      - DB_HOST=192.168.2.249
+      - DB_PORT=3306
+      - DB_DATABASE=xboard
+      - DB_USERNAME=root
+      - DB_PASSWORD=lihao123
+      - ENABLE_REDIS=true
+    depends_on:
+      - redis
+    network_mode: host
+    command: php artisan octane:start --port=7001 --host=0.0.0.0
+    restart: always
+  horizon:
+    image: ghcr.io/cedar2025/xboard:new
+    volumes:
+      - ./.docker/.data/redis/:/data/
+      - ./app/Protocols/General.php:/www/app/Protocols/General.php
+      - ./app/Protocols/ClashMeta.php:/www/app/Protocols/ClashMeta.php
+      - ./app/Protocols/SingBox.php:/www/app/Protocols/SingBox.php
+      - ./app/Protocols/Shadowrocket.php:/www/app/Protocols/Shadowrocket.php
+      - ./app/Http/Controllers/V1/Client/ClientController.php:/www/app/Http/Controllers/V1/Client/ClientController.php
+      - ./plugins/CustomNodes:/www/plugins/CustomNodes
+      - ./.env:/www/.env
+    environment:
+      - docker=true
+      - ENABLE_MYSQL=true
+      - DB_HOST=192.168.2.249
+      - DB_PORT=3306
+      - DB_DATABASE=xboard
+      - DB_USERNAME=root
+      - DB_PASSWORD=lihao123
+      - ENABLE_REDIS=true
+    command: php artisan horizon
+    depends_on:
+      - redis
+  redis:
+    image: redis:7-alpine
+    command: redis-server --unixsocket /data/redis.sock --unixsocketperm 777
+    restart: unless-stopped
+    volumes:
+      - ./.docker/.data/redis:/data
+    sysctls:
+      net.core.somaxconn: 1024
