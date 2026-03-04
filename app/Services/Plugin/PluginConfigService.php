@@ -29,12 +29,30 @@ class PluginConfigService
         $dbConfig = $this->getDbConfig($pluginCode);
 
         $result = [];
+        $groupHints = '';
+        if ($pluginCode === 'custom_nodes') {
+            try {
+                $groups = \App\Models\ServerGroup::select('id', 'name')->get();
+                $groupHints = '<br><br><b>当前可用权限组字典：</b><br>';
+                foreach ($groups as $group) {
+                    $groupHints .= "&nbsp;&nbsp;• ID <code>{$group->id}</code> : {$group->name}<br>";
+                }
+            } catch (\Throwable $e) {
+            }
+        }
+
         foreach ($defaultConfig as $key => $item) {
+            $desc = $item['description'] ?? '';
+            // 追加提示到需要配置权限规则的字段
+            if ($pluginCode === 'custom_nodes' && in_array($key, ['nodes_text', 'allowed_groups'])) {
+                $desc .= $groupHints;
+            }
+
             $result[$key] = [
                 'type' => $item['type'],
                 'label' => $item['label'] ?? '',
                 'placeholder' => $item['placeholder'] ?? '',
-                'description' => $item['description'] ?? '',
+                'description' => $desc,
                 'value' => $dbConfig[$key] ?? $item['default'],
                 'options' => $item['options'] ?? []
             ];

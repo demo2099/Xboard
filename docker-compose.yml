@@ -8,6 +8,8 @@ services:
       - ./app/Protocols/SingBox.php:/www/app/Protocols/SingBox.php
       - ./app/Protocols/Shadowrocket.php:/www/app/Protocols/Shadowrocket.php
       - ./app/Http/Controllers/V1/Client/ClientController.php:/www/app/Http/Controllers/V1/Client/ClientController.php
+      - ./app/Http/Controllers/V2/Admin/PluginController.php:/www/app/Http/Controllers/V2/Admin/PluginController.php
+      - ./app/Services/Plugin/PluginConfigService.php:/www/app/Services/Plugin/PluginConfigService.php
       - ./plugins/CustomNodes:/www/plugins/CustomNodes
       - ./.env:/www/.env
     environment:
@@ -33,6 +35,8 @@ services:
       - ./app/Protocols/SingBox.php:/www/app/Protocols/SingBox.php
       - ./app/Protocols/Shadowrocket.php:/www/app/Protocols/Shadowrocket.php
       - ./app/Http/Controllers/V1/Client/ClientController.php:/www/app/Http/Controllers/V1/Client/ClientController.php
+      - ./app/Http/Controllers/V2/Admin/PluginController.php:/www/app/Http/Controllers/V2/Admin/PluginController.php
+      - ./app/Services/Plugin/PluginConfigService.php:/www/app/Services/Plugin/PluginConfigService.php
       - ./plugins/CustomNodes:/www/plugins/CustomNodes
       - ./.env:/www/.env
     environment:
