@@ -33,9 +33,9 @@ class PluginConfigService
         if ($pluginCode === 'custom_nodes') {
             try {
                 $groups = \App\Models\ServerGroup::select('id', 'name')->get();
-                $groupHints = '<br><br><b>当前可用权限组字典：</b><br>';
+                $groupHints = "\n\n当前可用权限组：";
                 foreach ($groups as $group) {
-                    $groupHints .= "&nbsp;&nbsp;• ID <code>{$group->id}</code> : {$group->name}<br>";
+                    $groupHints .= "\n  [组ID: {$group->id}] {$group->name}";
                 }
             } catch (\Throwable $e) {
             }

@@ -83,9 +83,9 @@ class Plugin extends AbstractPlugin
         $groupHints = '';
         try {
             $groups = \App\Models\ServerGroup::select('id', 'name')->get();
-            $groupHints = '<br><br><b>当前可用权限组字典：</b><br>';
+            $groupHints = "\n\n当前可用权限组：";
             foreach ($groups as $group) {
-                $groupHints .= "&nbsp;&nbsp;• ID <code>{$group->id}</code> : {$group->name}<br>";
+                $groupHints .= "\n  [组ID: {$group->id}] {$group->name}";
             }
         } catch (\Throwable $e) {
         }
@@ -100,7 +100,7 @@ class Plugin extends AbstractPlugin
             'nodes_text' => [
                 'label' => '节点分享链接（每行一个）',
                 'type' => 'textarea',
-                'description' => '直接填入 vless://、trojan:// 等分享链接。<br><b>支持单节点独立权限组：</b>在链接后加上 <code>| 1,2</code> 表示该节点仅对 1组 和 2组 开放。若无 <code>|</code> 则使用下方的全局权限组。' . $groupHints
+                'description' => '直接填入 vless://、trojan:// 等分享链接。支持单节点独立权限组: 在链接后加上 | 1,2 表示该节点仅对 1组 和 2组 开放。若无 | 则使用下方全局权限组。' . $groupHints
             ],
             'allowed_groups' => [
                 'label' => '全局允许订阅的权限组（选填）',

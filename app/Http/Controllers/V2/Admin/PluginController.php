@@ -92,6 +92,7 @@ class PluginController extends Controller
                             $needUpgrade = true;
                         }
                     }
+
                     $plugins[] = [
                         'code' => $config['code'],
                         'name' => $config['name'],
