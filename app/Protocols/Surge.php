@@ -61,9 +61,12 @@ class Surge extends AbstractProtocol
         }
 
 
-        $config = admin_setting('subscribe_template_surge', File::exists(base_path(self::CUSTOM_TEMPLATE_FILE))
-            ? File::get(base_path(self::CUSTOM_TEMPLATE_FILE))
-            : File::get(base_path(self::DEFAULT_TEMPLATE_FILE)));
+        $config = admin_setting('subscribe_template_surge');
+        if (blank($config)) {
+            $config = File::exists(base_path(self::CUSTOM_TEMPLATE_FILE))
+                ? File::get(base_path(self::CUSTOM_TEMPLATE_FILE))
+                : File::get(base_path(self::DEFAULT_TEMPLATE_FILE));
+        }
 
         // Subscription link
         $subsDomain = request()->header('Host');

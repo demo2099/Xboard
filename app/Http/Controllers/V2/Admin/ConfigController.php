@@ -208,16 +208,28 @@ class ConfigController extends Controller
             ],
             'subscribe_template' => [
                 'subscribe_template_singbox' => $this->formatTemplateContent(
-                    admin_setting('subscribe_template_singbox', $this->getDefaultTemplate('singbox')),
+                    $this->getTemplateSetting('subscribe_template_singbox', 'singbox'),
                     'json'
                 ),
-                'subscribe_template_clash' => admin_setting('subscribe_template_clash', $this->getDefaultTemplate('clash')),
-                'subscribe_template_clashmeta' => admin_setting('subscribe_template_clashmeta', $this->getDefaultTemplate('clashmeta')),
-                'subscribe_template_stash' => admin_setting('subscribe_template_stash', $this->getDefaultTemplate('stash')),
-                'subscribe_template_surge' => admin_setting('subscribe_template_surge', $this->getDefaultTemplate('surge')),
-                'subscribe_template_surfboard' => admin_setting('subscribe_template_surfboard', $this->getDefaultTemplate('surfboard'))
+                'subscribe_template_clash' => $this->getTemplateSetting('subscribe_template_clash', 'clash'),
+                'subscribe_template_clashmeta' => $this->getTemplateSetting('subscribe_template_clashmeta', 'clashmeta'),
+                'subscribe_template_stash' => $this->getTemplateSetting('subscribe_template_stash', 'stash'),
+                'subscribe_template_surge' => $this->getTemplateSetting('subscribe_template_surge', 'surge'),
+                'subscribe_template_surfboard' => $this->getTemplateSetting('subscribe_template_surfboard', 'surfboard')
             ]
         ];
+    }
+
+    /**
+     * 获取模板配置：优先用户配置，空值时回退默认模板
+     */
+    private function getTemplateSetting(string $settingKey, string $templateType): string
+    {
+        $value = admin_setting($settingKey);
+        if (blank($value)) {
+            return $this->getDefaultTemplate($templateType);
+        }
+        return str($value)->toString();
     }
 
     public function save(ConfigSave $request)
@@ -232,6 +244,38 @@ class ConfigController extends Controller
             admin_setting([$k => $v]);
         }
 
+        return $this->success(true);
+    }
+
+    /**
+     * 重置订阅模板为文件默认（清空数据库中的覆盖值）
+     */
+    public function resetSubscribeTemplate(Request $request)
+    {
+        $type = (string) $request->input('type', 'all');
+        $mapping = [
+            'singbox' => 'subscribe_template_singbox',
+            'clash' => 'subscribe_template_clash',
+            'clashmeta' => 'subscribe_template_clashmeta',
+            'stash' => 'subscribe_template_stash',
+            'surge' => 'subscribe_template_surge',
+            'surfboard' => 'subscribe_template_surfboard',
+        ];
+
+        if ($type === 'all') {
+            $payload = [];
+            foreach ($mapping as $settingKey) {
+                $payload[$settingKey] = null;
+            }
+            admin_setting($payload);
+            return $this->success(true);
+        }
+
+        if (!isset($mapping[$type])) {
+            return $this->fail([422, '模板类型不支持']);
+        }
+
+        admin_setting([$mapping[$type] => null]);
         return $this->success(true);
     }
 

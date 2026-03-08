@@ -58,9 +58,12 @@ class Surfboard extends AbstractProtocol
             }
         }
 
-        $config = admin_setting('subscribe_template_surfboard', File::exists(base_path(self::CUSTOM_TEMPLATE_FILE))
-            ? File::get(base_path(self::CUSTOM_TEMPLATE_FILE))
-            : File::get(base_path(self::DEFAULT_TEMPLATE_FILE)));
+        $config = admin_setting('subscribe_template_surfboard');
+        if (blank($config)) {
+            $config = File::exists(base_path(self::CUSTOM_TEMPLATE_FILE))
+                ? File::get(base_path(self::CUSTOM_TEMPLATE_FILE))
+                : File::get(base_path(self::DEFAULT_TEMPLATE_FILE));
+        }
         // Subscription link
         $subsURL = Helper::getSubscribeUrl($user['token']);
         $subsDomain = request()->header('Host');
