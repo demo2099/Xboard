@@ -160,9 +160,13 @@ class Stash extends AbstractProtocol
         });
         $config['proxy-groups'] = array_values($config['proxy-groups']);
         // Force the current subscription domain to be a direct rule
-        $subsDomain = request()->header('Host');
-        if ($subsDomain) {
-            array_unshift($config['rules'], "DOMAIN,{$subsDomain},DIRECT");
+        $subsHost = request()->getHost();
+        if ($subsHost) {
+            if (filter_var($subsHost, FILTER_VALIDATE_IP)) {
+                array_unshift($config['rules'], "IP-CIDR,{$subsHost}/32,DIRECT,no-resolve");
+            } else {
+                array_unshift($config['rules'], "DOMAIN,{$subsHost},DIRECT");
+            }
         }
 
         $yaml = Yaml::dump($config, 2, 4, Yaml::DUMP_EMPTY_ARRAY_AS_SEQUENCE);
