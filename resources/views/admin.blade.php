@@ -79,7 +79,7 @@
             body: JSON.stringify({ type: type })
           });
           const data = await resp.json();
-          if (!resp.ok || (data && Number(data.code) !== 1 && Number(data.code) !== 200)) {
+          if (!resp.ok || !data || data.status !== "success") {
             throw new Error(data && data.message ? data.message : "请求失败");
           }
           alert("重置成功，页面将自动刷新。");
